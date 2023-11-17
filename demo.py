@@ -217,6 +217,7 @@ def main(args):
         pred_cam = pred_cam.cpu().numpy()
         pred_verts = pred_verts.cpu().numpy()
         pred_pose = pred_pose.cpu().numpy()
+        #[[-0.05479974  0.07123179 -1.3606331  -0.26504803 -0.08404145  0.28812385 -0.2497943  -0.03103043 -0.473845    0.17341751]]
         pred_betas = pred_betas.cpu().numpy()
         pred_joints3d = pred_joints3d.cpu().numpy()
         smpl_joints2d = smpl_joints2d.cpu().numpy()
@@ -268,8 +269,10 @@ def main(args):
     print(f'Total FPS (including model loading time): {num_frames / total_time:.2f}.')
 
     print(f'Saving output results to \"{os.path.join(output_path, "vibe_output.pkl")}\".')
-
-    joblib.dump(vibe_results, os.path.join(output_path, "vibe_output.pkl"))
+    for k,v in vibe_results.items():
+        if k != 'joints2d':
+            print(k, v)
+        joblib.dump(vibe_results, os.path.join(output_path, "vibe_output.pkl"))
 
     if not args.no_render:
         # ========= Render results as a single video ========= #
