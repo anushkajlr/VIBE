@@ -331,8 +331,8 @@ def main(args):
                         axis=[0,1,0],
                     )
 
-            if args.sideview:
-                img = np.concatenate([img, side_img], axis=1)
+            # if args.sideview:
+            #     img = np.concatenate([img, side_img], axis=1)
 
             cv2.imwrite(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), img)
 
