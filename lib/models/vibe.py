@@ -175,5 +175,7 @@ class VIBE_Demo(nn.Module):
             s['kp_2d'] = s['kp_2d'].reshape(batch_size, seqlen, -1, 2)
             s['kp_3d'] = s['kp_3d'].reshape(batch_size, seqlen, -1, 3)
             s['rotmat'] = s['rotmat'].reshape(batch_size, seqlen, -1, 3, 3)
-
+        print("ran hmr")
+        print(smpl_output)
         return smpl_output
+
