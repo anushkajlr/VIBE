@@ -199,11 +199,13 @@ class HMR(nn.Module):
             'kp_2d': pred_keypoints_2d,
             'kp_3d': pred_joints,
         }]
-        print("ran hmr")
+      
         if return_features:
             return xf, output
         else:
             return output
+            print("IN HMR THIS IS OUTPUT")
+            print(output)
 
 
 class Regressor(nn.Module):

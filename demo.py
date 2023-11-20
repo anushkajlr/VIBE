@@ -95,6 +95,9 @@ def main(args):
             yolo_img_size=args.yolo_img_size,
         )
         tracking_results = mot(image_folder)
+        print("IN BBOX AFTER TRACKING RESULTS HAVE BEEN FOUND")
+        print(tracking_results[0]['frames'])
+   
 
     # remove tracklets if num_frames is less than MIN_NUM_FRAMES
     for person_id in list(tracking_results.keys()):
@@ -110,17 +113,15 @@ def main(args):
         use_residual=True,
     ).to(device)
 
-    # ========= Load pretrained weights ========= #
     pretrained_file = download_ckpt(use_3dpw=False)
     ckpt = torch.load(pretrained_file)
     print(f'Performance of pretrained model on 3DPW: {ckpt["performance"]}')
     ckpt = ckpt['gen_state_dict']
     model.load_state_dict(ckpt, strict=False)
     model.eval()
-    print(f'Loaded pretrained weights from \"{pretrained_file}\"')
 
-    # ========= Run VIBE on each person ========= #
-    print(f'Running VIBE on each tracklet...')
+    
+  
     vibe_time = time.time()
     vibe_results = {}
     for person_id in tqdm(list(tracking_results.keys())):
@@ -178,7 +179,7 @@ def main(args):
             smpl_joints2d = torch.cat(smpl_joints2d, dim=0)
             del batch
 
-        # ========= [Optional] run Temporal SMPLify to refine the results ========= #
+       
         if args.run_smplify and args.tracking_method == 'pose':
             norm_joints2d = np.concatenate(norm_joints2d, axis=0)
             norm_joints2d = convert_kps(norm_joints2d, src='staf', dst='spin')
@@ -213,16 +214,17 @@ def main(args):
             print('[WARNING] You need to enable pose tracking to run Temporal SMPLify algorithm!')
             print('[WARNING] Continuing without running Temporal SMPLify!..')
 
-        # ========= Save results to a pickle file ========= #
+  
         pred_cam = pred_cam.cpu().numpy()
         pred_verts = pred_verts.cpu().numpy()
         pred_pose = pred_pose.cpu().numpy()
+        #TRY WITH THESE BETA PARAMTERS ONCE AND CHECK WHAT HAPPENS 
         #[[-0.05479974  0.07123179 -1.3606331  -0.26504803 -0.08404145  0.28812385 -0.2497943  -0.03103043 -0.473845    0.17341751]]
         pred_betas = pred_betas.cpu().numpy()
         pred_joints3d = pred_joints3d.cpu().numpy()
         smpl_joints2d = smpl_joints2d.cpu().numpy()
 
-        # Runs 1 Euro Filter to smooth out the results
+  
         if args.smooth:
             min_cutoff = args.smooth_min_cutoff # 0.004
             beta = args.smooth_beta # 1.5
@@ -260,22 +262,16 @@ def main(args):
 
     del model
 
-    end = time.time()
-    fps = num_frames / (end - vibe_time)
 
-    print(f'VIBE FPS: {fps:.2f}')
-    total_time = time.time() - total_time
-    print(f'Total time spent: {total_time:.2f} seconds (including model loading time).')
-    print(f'Total FPS (including model loading time): {num_frames / total_time:.2f}.')
 
-    print(f'Saving output results to \"{os.path.join(output_path, "vibe_output.pkl")}\".')
+
     for k,v in vibe_results.items():
         if k != 'joints2d':
             print(k, v)
         joblib.dump(vibe_results, os.path.join(output_path, "vibe_output.pkl"))
 
     if not args.no_render:
-        # ========= Render results as a single video ========= #
+ 
         renderer = Renderer(resolution=(orig_width, orig_height), orig_img=True, wireframe=args.wireframe)
 
         output_img_folder = f'{image_folder}_output'
