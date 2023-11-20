@@ -96,7 +96,7 @@ def main(args):
         )
         tracking_results = mot(image_folder)
         print("IN BBOX AFTER TRACKING RESULTS HAVE BEEN FOUND")
-        print(tracking_results[0]['frames'])
+        print(tracking_results)
    
 
     # remove tracklets if num_frames is less than MIN_NUM_FRAMES
