@@ -134,7 +134,7 @@ class VIBE_Demo(nn.Module):
 
         self.seqlen = seqlen
         self.batch_size = batch_size
-
+        #vibe encoder is a temporal encoder model
         self.encoder = TemporalEncoder(
             n_layers=n_layers,
             hidden_size=hidden_size,
@@ -142,14 +142,15 @@ class VIBE_Demo(nn.Module):
             add_linear=add_linear,
             use_residual=use_residual,
         )
-
+        #vibe hmr uses an hmr model
         self.hmr = hmr()
         checkpoint = torch.load(pretrained)
         self.hmr.load_state_dict(checkpoint['model'], strict=False)
 
         # regressor can predict cam, pose and shape params in an iterative way
+        #vibe also has an hmr model
         self.regressor = Regressor()
-
+        #loading pretrained spin model
         if pretrained and os.path.isfile(pretrained):
             pretrained_dict = torch.load(pretrained)['model']
 
@@ -160,14 +161,16 @@ class VIBE_Demo(nn.Module):
     def forward(self, input, J_regressor=None):
         # input size NTF
         batch_size, seqlen, nc, h, w = input.shape
-
-        feature = self.hmr.feature_extractor(input.reshape(-1, nc, h, w))
+        print("INPUT SHAPE TO VIBE FORWARD")
+        print(input.shape)
+        print(input)
+        feature = self.hmr.feature_extractor(input.reshape(-1, nc, h, w)) #uses hmr as well 
 
         feature = feature.reshape(batch_size, seqlen, -1)
-        feature = self.encoder(feature)
+        feature = self.encoder(feature)#does not load spin uses only the encoded
         feature = feature.reshape(-1, feature.size(-1))
 
-        smpl_output = self.regressor(feature, J_regressor=J_regressor)
+        smpl_output = self.regressor(feature, J_regressor=J_regressor)#Uses the regressor
 
         for s in smpl_output:
             s['theta'] = s['theta'].reshape(batch_size, seqlen, -1)

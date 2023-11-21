@@ -138,6 +138,8 @@ class HMR(nn.Module):
 
         xf = self.avgpool(x4)
         xf = xf.view(xf.size(0), -1)
+        print("result of hmr feature extracter")
+        print(xf)
         return xf
 
     def forward(self, x, init_pose=None, init_shape=None, init_cam=None, n_iter=3, return_features=False):
@@ -178,7 +180,7 @@ class HMR(nn.Module):
             pred_cam = self.deccam(xc) + pred_cam
 
         pred_rotmat = rot6d_to_rotmat(pred_pose).view(batch_size, 24, 3, 3)
-
+        #here is where vertices and joints are predicted
         pred_output = self.smpl(
             betas=pred_shape,
             body_pose=pred_rotmat[:, 1:],
